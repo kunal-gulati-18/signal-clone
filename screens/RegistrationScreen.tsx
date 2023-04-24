@@ -9,8 +9,9 @@ import {
 import Lottie from 'lottie-react-native';
 import { Button, Input } from '@rneui/themed';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-// import ImagePicker from 'react-native-image-picker';
 import * as ImagePicker from 'expo-image-picker';
+import { checkDefinedValue } from '../utils';
+import { auth } from '../firebase';
 
 const RegistrationScreen = () => {
 	const [inputConfig, setInputConfig] = useState({
@@ -26,6 +27,8 @@ const RegistrationScreen = () => {
 		password: '',
 	});
 
+	const [profilePictureLoader, setProfilePictureLoader] = useState(false);
+
 	const [secureEntry, setSecureEntry] = useState(true);
 
 	const onFieldChange = (key: string, value: string) => {
@@ -34,7 +37,9 @@ const RegistrationScreen = () => {
 			[key]: value,
 		});
 	};
-	const validateFields = () => {};
+	const validateFields = () => {
+		auth.  
+	};
 
 	const onRegisterClick = () => {};
 
@@ -49,6 +54,8 @@ const RegistrationScreen = () => {
 		data.append('cloud_name', 'dqkkq9abg');
 		data.append('api_key', '627925767214477');
 
+		setProfilePictureLoader(true);
+
 		fetch('https://api.cloudinary.com/v1_1/dqkkq9abg/upload', {
 			method: 'post',
 			body: data,
@@ -60,10 +67,14 @@ const RegistrationScreen = () => {
 					profilePicture: data.secure_url,
 				});
 			})
-			.catch((err) => {});
+			.catch((err) => {}).finally(() => {
+				setProfilePictureLoader(false);
+			});
 	};
 
 	const selectPhotoTapped = async () => {
+		if(profilePictureLoader) return;
+
 		let result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.All,
 			allowsEditing: true,
@@ -72,6 +83,10 @@ const RegistrationScreen = () => {
 		});
 
 		if (!result.canceled) {
+			setInputConfig({
+				...inputConfig,
+				profilePicture: '',
+			});
 			onImageUpload({
 				uri: result.assets[0].uri,
 				name: result.assets[0]?.fileName || 'test',
@@ -133,21 +148,29 @@ const RegistrationScreen = () => {
 				onChangeText={(value: string) => onFieldChange('password', value)}
 			/>
 
-			<View className="w-full flex-row items-start p-2">
+			<View className="w-full flex-col items-start p-2 space-y-2">
 				<TouchableOpacity
 					className="border-gray-400 border-b-2 w-full py-2"
+					disabled={profilePictureLoader}
 					onPress={selectPhotoTapped}
 				>
 					<Text className="text-blue-400 text-lg font-bold">
 						Upload Image (Optional)
 					</Text>
 				</TouchableOpacity>
+
+				{checkDefinedValue(inputConfig.profilePicture) ? (
+					<View className="flex-row items-center space-x-1">
+						<AntDesign name="checkcircleo" size={20} color="green" />
+						<Text className="text-green-900">Profile picture uploaded successfully.</Text>
+					</View>
+				) : null}
 			</View>
 			<View className="px-2 mt-4">
-				<Button title="Register" />
+				<Button raised title="Register" />
 			</View>
 
-			<View className="h-40" />
+			<View className="h-56" />
 		</KeyboardAvoidingView>
 	);
 };
