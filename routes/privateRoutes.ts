@@ -1,3 +1,4 @@
+import AddChatScreen from '../screens/AddChatScreen';
 import HomeScreen from '../screens/HomeScreen/HomeScreen';
 
 export const privateRoute = () => {
@@ -5,6 +6,10 @@ export const privateRoute = () => {
 		{
 			name: 'Home',
 			component: HomeScreen,
+		},
+		{
+			name: 'AddChatScreen',
+			component: AddChatScreen,
 		},
 	];
 };

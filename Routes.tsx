@@ -13,31 +13,41 @@ const Routes = () => {
 
 	return (
 		<NavigationContainer>
-			<Stack.Navigator>
-				{!user && publicRoute().map((route) => (
-					<Stack.Screen
-						name={route.name}
-						component={route.component}
-						options={{
-							headerStyle: {
-								backgroundColor: '#2c6bed',
-							},
-							headerTitleStyle: {
-								color: 'white',
-							},
-							headerTintColor: 'white',
-						}}
-					/>
-				))}
-				{user && privateRoute().map((route) => (
-					<Stack.Screen
-						name={route.name}
-						component={route.component}
-						options={{
-							headerShown: false,
-						}}
-					/>
-				))}
+			<Stack.Navigator
+			initialRouteName='Home'
+			>
+				{!user &&
+					publicRoute().map((route) => (
+						<Stack.Screen
+							name={route.name}
+							component={route.component}
+							options={{
+								headerStyle: {
+									backgroundColor: '#2c6bed',
+								},
+								headerTitleStyle: {
+									color: 'white',
+								},
+								headerTintColor: 'white',
+							}}
+						/>
+					))}
+				{user &&
+					privateRoute().map((route) => (
+						<Stack.Screen
+							name={route.name}
+							component={route.component}
+							options={{
+								headerStyle: {
+									backgroundColor: '#2c6bed',
+								},
+								headerTitleStyle: {
+									color: 'white',
+								},
+								headerTintColor: 'white',
+							}}
+						/>
+					))}
 			</Stack.Navigator>
 		</NavigationContainer>
 	);
