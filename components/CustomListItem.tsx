@@ -2,9 +2,20 @@ import { ListItem, Avatar } from '@rneui/themed';
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const CustomListItem = ({ id, chatName, enterChat }: { chatName: string; id: string; enterChat: (x: any) => void; }) => {
+const CustomListItem = ({
+	id,
+	chatName,
+	enterChat,
+}: {
+	chatName: string;
+	id: string;
+	enterChat: (x: string, y: string) => void;
+}) => {
+	const onItemClick = () => {
+		enterChat(id, chatName);
+	}
 	return (
-		<ListItem>
+		<ListItem onPress={onItemClick} bottomDivider key={id}>
 			<Avatar
 				rounded
 				source={{
@@ -12,13 +23,10 @@ const CustomListItem = ({ id, chatName, enterChat }: { chatName: string; id: str
 				}}
 			/>
 			<ListItem.Content>
-				<ListItem.Title style={{ fontWeight: 800 }}>MSD</ListItem.Title>
-				<ListItem.Subtitle
-					numberOfLines={1}
-					ellipsizeMode="tail"
-				>
-                    Hello this is a beautifuk day please come aloing and enjoy
-                </ListItem.Subtitle>
+				<ListItem.Title style={{ fontWeight: 800 }}>{chatName}</ListItem.Title>
+				<ListItem.Subtitle numberOfLines={1} ellipsizeMode="tail">
+					ABC
+				</ListItem.Subtitle>
 			</ListItem.Content>
 		</ListItem>
 	);

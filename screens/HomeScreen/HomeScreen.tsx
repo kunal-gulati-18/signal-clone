@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useEffect, useState } from 'react';
 import {
 	SafeAreaView,
 	Text,
@@ -18,13 +18,17 @@ import { userSelector } from '../../reducers/userSlice';
 import CustomListItem from '../../components/CustomListItem';
 import { Avatar } from '@rneui/themed';
 import { signOut } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { auth, collection, db } from '../../firebase';
 import { setUser } from '../../reducers/userSlice';
+import { getDocs } from 'firebase/firestore';
+// import { collection, doc, getDoc, getFirestore } from 'firebase/firestore';
 
 const HomeScreen = () => {
 	const dispatch = useDispatch();
 	const user = useSelector(userSelector);
+	const [chats, setChats] = useState<{ chatName: string }[]>([]);
 	const navigation = useNavigation();
+	const chatsRef = collection(db, 'chats');
 
 	const onSignOut = () => {
 		signOut(auth).then(() => {
@@ -36,9 +40,17 @@ const HomeScreen = () => {
 		});
 	};
 
-  const onAddChat = () => {
-    navigation.navigate("AddChatScreen")
-  };
+	const onAddChat = () => {
+		navigation.navigate('AddChatScreen');
+	};
+
+	const onEnterChat = (id: string, chatName: string) => {
+		navigation.navigate('Chat', {
+			id,
+			chatName,
+		});
+	};
+
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			title: 'Signal',
@@ -76,10 +88,24 @@ const HomeScreen = () => {
 			),
 		});
 	}, []);
+
+	useEffect(() => {
+		getDocs(chatsRef).then((response) => {
+			const data = response.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+			setChats(data as { chatName: string }[]);
+		});
+
+		return () => {};
+	}, []);
+
 	return (
-		<SafeAreaView>
+		<SafeAreaView className="h-full">
 			<ScrollView showsVerticalScrollIndicator={false}>
-				<CustomListItem />
+				{chats?.length
+					? chats.map((chat: { chatName: string; id: string }) => (
+							<CustomListItem key={chat.id} id={chat.id} chatName={chat.chatName} enterChat={onEnterChat} />
+					  ))
+					: null}
 			</ScrollView>
 		</SafeAreaView>
 	);

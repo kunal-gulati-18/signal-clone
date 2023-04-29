@@ -45,6 +45,7 @@ const Routes = () => {
 									color: 'white',
 								},
 								headerTintColor: 'white',
+								...route.options
 							}}
 						/>
 					))}

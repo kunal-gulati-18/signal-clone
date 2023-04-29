@@ -33,6 +33,7 @@ const db = getFirestore(app);
 export {
 	auth,
 	db,
+	collection,
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword,
 	onAuthStateChanged,
