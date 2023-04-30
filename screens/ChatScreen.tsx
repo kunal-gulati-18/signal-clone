@@ -23,6 +23,7 @@ import {
 	doc,
 	getDoc,
 	getDocs,
+	onSnapshot,
 	setDoc,
 	updateDoc,
 } from 'firebase/firestore';
@@ -34,8 +35,6 @@ const ChatScreen = () => {
 	const { params } = useRoute();
 	const chatsRef = doc(db, 'chats', params.id);
 	const messagesRef = collection(chatsRef, 'messages');
-
-	console.log('chatsRef', chatsRef.id);
 
 	const [input, setInput] = useState('');
 	const [messages, setMessages] = useState([]);
@@ -91,16 +90,25 @@ const ChatScreen = () => {
 	}, []);
 
 	useEffect(() => {
-		getDocs(messagesRef).then((response) => {
-			const data = response.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-			setMessages(data);
+		const unSubscribe = onSnapshot(messagesRef, (snapshot) => {
+			const data = snapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data(),
+			}));
+
+			data.sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
+			setMessages(
+				data
+			);
 		});
+
+		return unSubscribe;
 	}, []);
 
-    console.log('messages', messages)
+	console.log('messges', messages)
 
 	return (
-		<SafeAreaView className="h-full">
+		<SafeAreaView className="h-full w-full">
 			<KeyboardAvoidingView
 				className="flex-1"
 				keyboardVerticalOffset={90}
@@ -109,10 +117,58 @@ const ChatScreen = () => {
 				<>
 					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 						<>
-							<ScrollView
-								className="flex-row"
-								showsVerticalScrollIndicator={false}
-							></ScrollView>
+							<ScrollView showsVerticalScrollIndicator={false}>
+								{messages.map((message) =>
+									message.email === user.email ? (
+										<View
+											key={message.id}
+											className="w-full mt-2 mb-4 flex-row justify-end"
+										>
+											<View className="p-3 bg-[#ececec] rounded-full flex-row items-center space-x-2 relative mr-2">
+												<Avatar
+													source={{
+														uri:
+															message.photoUrl ||
+															'https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg',
+													}}
+													rounded
+													size={22}
+													containerStyle={{
+														position: 'absolute',
+														right: 0,
+														bottom: -15,
+													}}
+												/>
+												<Text className="font-semibold text-left">
+													{message.message}
+												</Text>
+											</View>
+										</View>
+									) : (
+										<View
+											key={message.id}
+											className="w-full mt-2 mb-4 flex-row justify-start"
+										>
+											<View className="p-3 bg-[#2b68e6] items-center flex-row space-x-2 ml-2">
+												<Avatar
+													source={{
+														uri:
+															message.photoUrl ||
+															'https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg',
+													}}
+													rounded
+													containerStyle={{
+														position: 'absolute',
+														left: 0,
+														bottom: -15,
+													}}
+												/>
+												<Text className="font-semibold">{message.message}</Text>
+											</View>
+										</View>
+									)
+								)}
+							</ScrollView>
 							<View className="flex-row w-full justify-between px-2 items-start">
 								<View className="w-11/12">
 									<Input
