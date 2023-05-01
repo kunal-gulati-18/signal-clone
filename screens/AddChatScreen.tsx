@@ -3,11 +3,14 @@ import { useNavigation } from '@react-navigation/native';
 import { Text, View } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { Button, Input } from '@rneui/themed';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { Timestamp, collection, doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { checkDefinedValue } from '../utils';
+import { useSelector } from 'react-redux';
+import { userSelector } from '../reducers/userSlice';
 
 const AddChatScreen = () => {
+	const user = useSelector(userSelector);
 	const navigation = useNavigation();
 	const [chatName, setChatName] = useState<string>('');
 	const [loading, setLoading] = useState(false);
@@ -19,6 +22,8 @@ const AddChatScreen = () => {
 		setLoading(true);
 		setDoc(doc(collection(db, 'chats')), {
 			chatName,
+			user_id: user.uid,
+			created_at: Timestamp.now()
 		})
 			.then(() => {
 				navigation.reset({
@@ -38,9 +43,7 @@ const AddChatScreen = () => {
 			headerBackTitle: 'Chats',
 		});
 
-		return () => {
-			
-		}
+		return () => {};
 	}, [navigation]);
 
 	return (

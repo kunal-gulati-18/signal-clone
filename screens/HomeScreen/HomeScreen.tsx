@@ -20,7 +20,7 @@ import { Avatar } from '@rneui/themed';
 import { signOut } from 'firebase/auth';
 import { auth, collection, db } from '../../firebase';
 import { setUser } from '../../reducers/userSlice';
-import { getDocs } from 'firebase/firestore';
+import { getDocs, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 // import { collection, doc, getDoc, getFirestore } from 'firebase/firestore';
 
 const HomeScreen = () => {
@@ -28,7 +28,13 @@ const HomeScreen = () => {
 	const user = useSelector(userSelector);
 	const [chats, setChats] = useState<{ chatName: string }[]>([]);
 	const navigation = useNavigation();
-	const chatsRef = collection(db, 'chats');
+	const chatsRef = query(
+		collection(db, 'chats'),
+		orderBy('created_at', 'asc'),
+		where('user_id', '==', `${user.uid}`)
+	);
+
+	console.log('user', user);
 
 	const onSignOut = () => {
 		signOut(auth).then(() => {
@@ -90,20 +96,28 @@ const HomeScreen = () => {
 	}, []);
 
 	useEffect(() => {
-		getDocs(chatsRef).then((response) => {
-			const data = response.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-			setChats(data as { chatName: string }[]);
+		const unsubscribe = onSnapshot(chatsRef, (responseSnapshot) => {
+			setChats(
+				responseSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+			);
 		});
 
-		return () => {};
+		return unsubscribe;
 	}, []);
+
+	console.log('chats', chats);
 
 	return (
 		<SafeAreaView className="h-full">
 			<ScrollView showsVerticalScrollIndicator={false}>
 				{chats?.length
 					? chats.map((chat: { chatName: string; id: string }) => (
-							<CustomListItem key={chat.id} id={chat.id} chatName={chat.chatName} enterChat={onEnterChat} />
+							<CustomListItem
+								key={chat.id}
+								id={chat.id}
+								chatName={chat.chatName}
+								enterChat={onEnterChat}
+							/>
 					  ))
 					: null}
 			</ScrollView>

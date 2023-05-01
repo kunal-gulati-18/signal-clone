@@ -97,15 +97,13 @@ const ChatScreen = () => {
 			}));
 
 			data.sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
-			setMessages(
-				data
-			);
+			setMessages(data);
 		});
 
 		return unSubscribe;
 	}, []);
 
-	console.log('messges', messages)
+	console.log('messges', messages);
 
 	return (
 		<SafeAreaView className="h-full w-full">
@@ -135,13 +133,22 @@ const ChatScreen = () => {
 													size={22}
 													containerStyle={{
 														position: 'absolute',
-														right: 0,
-														bottom: -15,
+														left: -30,
 													}}
 												/>
-												<Text className="font-semibold text-left">
-													{message.message}
-												</Text>
+												<View className="flex-col space-y-1">
+													<Text className="font-semibold text-left">
+														{message.message}
+													</Text>
+													<Text className="text-xs text-right w-full">
+														{new Date(
+															message.timestamp.seconds * 1000
+														).toLocaleTimeString([], {
+															hour: '2-digit',
+															minute: '2-digit',
+														})}
+													</Text>
+												</View>
 											</View>
 										</View>
 									) : (
@@ -149,7 +156,7 @@ const ChatScreen = () => {
 											key={message.id}
 											className="w-full mt-2 mb-4 flex-row justify-start"
 										>
-											<View className="p-3 bg-[#2b68e6] items-center flex-row space-x-2 ml-2">
+											<View className="p-3 rounded-full flex-row items-center space-x-2 relative mr-2 bg-blue-600">
 												<Avatar
 													source={{
 														uri:
@@ -157,13 +164,25 @@ const ChatScreen = () => {
 															'https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg',
 													}}
 													rounded
+													size={22}
 													containerStyle={{
 														position: 'absolute',
-														left: 0,
-														bottom: -15,
+														right: -30,
 													}}
 												/>
-												<Text className="font-semibold">{message.message}</Text>
+												<View className="flex-col space-y-1">
+													<Text className="font-semibold text-left text-white">
+														{message.message}
+													</Text>
+													<Text className="text-xs text-left w-full text-white">
+														{new Date(
+															message.timestamp.seconds * 1000
+														).toLocaleTimeString([], {
+															hour: '2-digit',
+															minute: '2-digit',
+														})}
+													</Text>
+												</View>
 											</View>
 										</View>
 									)
