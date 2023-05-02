@@ -16,25 +16,25 @@ import {
 } from '@expo/vector-icons';
 import { userSelector } from '../../reducers/userSlice';
 import CustomListItem from '../../components/CustomListItem';
-import { Avatar } from '@rneui/themed';
+import { Avatar, Skeleton } from '@rneui/themed';
 import { signOut } from 'firebase/auth';
 import { auth, collection, db } from '../../firebase';
 import { setUser } from '../../reducers/userSlice';
 import { getDocs, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import Lottie from 'lottie-react-native';
 // import { collection, doc, getDoc, getFirestore } from 'firebase/firestore';
 
 const HomeScreen = () => {
 	const dispatch = useDispatch();
 	const user = useSelector(userSelector);
 	const [chats, setChats] = useState<{ chatName: string }[]>([]);
+	const [loading, setLoading] = useState<boolean>(true);
 	const navigation = useNavigation();
 	const chatsRef = query(
 		collection(db, 'chats'),
 		orderBy('created_at', 'asc'),
 		where('user_id', '==', `${user.uid}`)
 	);
-
-	console.log('user', user);
 
 	const onSignOut = () => {
 		signOut(auth).then(() => {
@@ -96,31 +96,87 @@ const HomeScreen = () => {
 	}, []);
 
 	useEffect(() => {
-		const unsubscribe = onSnapshot(chatsRef, (responseSnapshot) => {
-			setChats(
-				responseSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-			);
-		});
+		const unsubscribe = onSnapshot(
+			chatsRef,
+			(responseSnapshot) => {
+				setChats(
+					responseSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+				);
+				setLoading(false);
+			},
+			() => {
+				setLoading(false);
+			}
+		);
 
 		return unsubscribe;
 	}, []);
 
-	console.log('chats', chats);
-
 	return (
 		<SafeAreaView className="h-full">
-			<ScrollView showsVerticalScrollIndicator={false}>
-				{chats?.length
-					? chats.map((chat: { chatName: string; id: string }) => (
-							<CustomListItem
-								key={chat.id}
-								id={chat.id}
-								chatName={chat.chatName}
-								enterChat={onEnterChat}
+			{loading ? (
+				<View className="flex-col space-y-2">
+					{Array.from({ length: 11 }, (_, i) => (
+						<View key={i} className="items-center flex-row space-x-1 p-3">
+							<Skeleton
+								skeletonStyle={{
+									backgroundColor: 'lightgray',
+								}}
+								animation="pulse"
+								circle
+								width={40}
+								height={40}
 							/>
-					  ))
-					: null}
-			</ScrollView>
+							<View className="flex-col space-y-2">
+								<Skeleton
+									style={{ borderRadius: 20 }}
+									skeletonStyle={{
+										backgroundColor: 'lightgray',
+									}}
+									animation="pulse"
+									width={180}
+									height={10}
+								/>
+								<Skeleton
+									style={{ borderRadius: 20 }}
+									skeletonStyle={{
+										backgroundColor: 'lightgray',
+									}}
+									animation="pulse"
+									width={340}
+									height={8}
+								/>
+							</View>
+						</View>
+					))}
+				</View>
+			) : !chats?.length ? (
+				<ScrollView showsVerticalScrollIndicator={false}>
+					{chats.map((chat: { chatName: string; id: string }) => (
+						<CustomListItem
+							key={chat.id}
+							id={chat.id}
+							chatName={chat.chatName}
+							enterChat={onEnterChat}
+						/>
+					))}
+				</ScrollView>
+			) : (
+				<>
+					<View className="flex-col h-2/3 items-center justify-center w-full">
+						<Lottie
+							source={require('../assets/noChatRoom.json')}
+							autoPlay
+							loop
+							style={{ height: "50%", width: "50%" }}
+							// className="w-full h-full"
+						/>
+						<TouchableOpacity className="text-black">
+							<Text>Create your first own chatroom...</Text>
+						</TouchableOpacity>
+					</View>
+				</>
+			)}
 		</SafeAreaView>
 	);
 };
