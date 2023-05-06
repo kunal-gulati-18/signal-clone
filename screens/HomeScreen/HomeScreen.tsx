@@ -150,7 +150,7 @@ const HomeScreen = () => {
 						</View>
 					))}
 				</View>
-			) : !chats?.length ? (
+			) : chats?.length ? (
 				<ScrollView showsVerticalScrollIndicator={false}>
 					{chats.map((chat: { chatName: string; id: string }) => (
 						<CustomListItem
@@ -163,16 +163,16 @@ const HomeScreen = () => {
 				</ScrollView>
 			) : (
 				<>
-					<View className="flex-col h-2/3 items-center justify-center w-full">
+					<View className="flex-col items-center justify-around h-full w-full">
 						<Lottie
 							source={require('../assets/noChatRoom.json')}
 							autoPlay
 							loop
-							style={{ height: "50%", width: "50%" }}
+							style={{ width: "90%", display: "flex", alignItems: "center" }}
 							// className="w-full h-full"
 						/>
-						<TouchableOpacity className="text-black">
-							<Text>Create your first own chatroom...</Text>
+						<TouchableOpacity onPress={onAddChat} className="text-black bg-[#2089dc] rounded-md p-3 -top-8">
+							<Text className="text-lg text-white font-semibold">Create your first own chatroom.</Text>
 						</TouchableOpacity>
 					</View>
 				</>
